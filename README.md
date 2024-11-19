@@ -1,0 +1,2 @@
+# ConnIdKafkaBundle
+ ConnId: Kafka bundle 
