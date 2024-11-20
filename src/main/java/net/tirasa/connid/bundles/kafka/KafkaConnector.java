@@ -55,6 +55,8 @@ import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.common.objects.ConnectorObjectBuilder;
+import org.identityconnectors.framework.common.objects.LiveSyncDeltaBuilder;
+import org.identityconnectors.framework.common.objects.LiveSyncResultsHandler;
 import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.ObjectClassInfo;
@@ -64,7 +66,6 @@ import org.identityconnectors.framework.common.objects.Schema;
 import org.identityconnectors.framework.common.objects.SyncDelta;
 import org.identityconnectors.framework.common.objects.SyncDeltaBuilder;
 import org.identityconnectors.framework.common.objects.SyncDeltaType;
-import org.identityconnectors.framework.common.objects.SyncResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.spi.Configuration;
@@ -72,14 +73,14 @@ import org.identityconnectors.framework.spi.Connector;
 import org.identityconnectors.framework.spi.ConnectorClass;
 import org.identityconnectors.framework.spi.operations.CreateOp;
 import org.identityconnectors.framework.spi.operations.DeleteOp;
+import org.identityconnectors.framework.spi.operations.LiveSyncOp;
 import org.identityconnectors.framework.spi.operations.SchemaOp;
-import org.identityconnectors.framework.spi.operations.SyncOp;
 import org.identityconnectors.framework.spi.operations.TestOp;
 import org.identityconnectors.framework.spi.operations.UpdateOp;
 
 @ConnectorClass(configurationClass = KafkaConfiguration.class, displayNameKey = "kafka.connector.display")
 public class KafkaConnector
-        implements Connector, CreateOp, UpdateOp, DeleteOp, SchemaOp, SyncOp, TestOp {
+        implements Connector, CreateOp, UpdateOp, DeleteOp, SchemaOp, LiveSyncOp, TestOp {
 
     private static final Log LOG = Log.getLog(KafkaConnector.class);
 
@@ -267,10 +268,9 @@ public class KafkaConnector
     }
 
     @Override
-    public void sync(
+    public void livesync(
             final ObjectClass objectClass,
-            final SyncToken token,
-            final SyncResultsHandler handler,
+            final LiveSyncResultsHandler handler,
             final OperationOptions options) {
 
         try (KafkaConsumer<String, Object> consumer = createConsumer(objectClass)) {
@@ -281,26 +281,20 @@ public class KafkaConnector
                 Map<String, String> headers = new HashMap<>();
                 record.headers().forEach(header -> headers.put(header.key(), new String(header.value())));
 
-                handler.handle(new SyncDeltaBuilder().
-                        setDeltaType(SyncDeltaType.CREATE_OR_UPDATE).
+                handler.handle(new LiveSyncDeltaBuilder().
                         setObjectClass(objectClass).
                         setUid(uid).
                         setObject(new ConnectorObjectBuilder().
                                 addAttribute(new Name(uid.getUidValue())).
+                                addAttribute(AttributeBuilder.build("record.timestamp", record.timestamp())).
                                 addAttribute(AttributeBuilder.build("record.headers", headers)).
                                 addAttribute(AttributeBuilder.build("record.value", record.value())).
                                 setUid(uid).
                                 build()).
-                        setToken(new SyncToken(record.timestamp())).
                         build());
             });
         } catch (Exception e) {
             throw new ConnectorException("While polling events from " + getTopic(objectClass), e);
         }
-    }
-
-    @Override
-    public SyncToken getLatestSyncToken(final ObjectClass objectClass) {
-        return new SyncToken(System.currentTimeMillis());
     }
 }

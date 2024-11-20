@@ -33,11 +33,10 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorFacadeFactory;
+import org.identityconnectors.framework.common.objects.LiveSyncDelta;
 import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
-import org.identityconnectors.framework.common.objects.SyncDelta;
-import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.test.common.TestHelpers;
 import org.junit.jupiter.api.Test;
@@ -102,7 +101,7 @@ class KafkaConnectorTests {
     }
 
     @Test
-    void sync() throws InterruptedException, ExecutionException {
+    void livesync() throws InterruptedException, ExecutionException {
         // create a producer and send a new event
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_CONTAINER.getBootstrapServers());
@@ -115,12 +114,11 @@ class KafkaConnectorTests {
             producer.send(new ProducerRecord<>(ObjectClass.GROUP_NAME, value)).get();
         }
 
-        // sync
-        List<SyncDelta> deltas = new ArrayList<>();
+        // live sync
+        List<LiveSyncDelta> deltas = new ArrayList<>();
         await().atMost(5, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
-            newFacade().sync(
+            newFacade().livesync(
                     ObjectClass.GROUP,
-                    new SyncToken(""),
                     deltas::add,
                     new OperationOptionsBuilder().build());
             return !deltas.isEmpty();
