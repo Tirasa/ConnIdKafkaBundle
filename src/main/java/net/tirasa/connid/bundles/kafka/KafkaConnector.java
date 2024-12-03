@@ -163,14 +163,14 @@ public class KafkaConnector
             throw new ConnectorException("No Kafka producer configured");
         }
         try {
-            producer.clientInstanceId(Duration.ofSeconds(10));
+            producer.metrics();
         } catch (Exception e) {
             LOG.error(e, "While testing Kafka producer");
             throw new ConnectionFailedException(e);
         }
 
         try (KafkaConsumer<String, Object> consumer = createConsumer(ObjectClass.ACCOUNT)) {
-            consumer.clientInstanceId(Duration.ofSeconds(10));
+            consumer.listTopics(Duration.ofSeconds(10));
         } catch (Exception e) {
             LOG.error(e, "While testing Kafka consumer");
             throw new ConnectionFailedException(e);

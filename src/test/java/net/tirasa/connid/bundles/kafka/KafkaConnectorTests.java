@@ -19,6 +19,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,6 +103,13 @@ class KafkaConnectorTests {
 
     @Test
     void livesync() throws InterruptedException, ExecutionException {
+        List<LiveSyncDelta> deltas = new ArrayList<>();
+        newFacade().livesync(
+                ObjectClass.GROUP,
+                deltas::add,
+                new OperationOptionsBuilder().build());
+        assertTrue(deltas.isEmpty());
+
         // create a producer and send a new event
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_CONTAINER.getBootstrapServers());
@@ -115,7 +123,7 @@ class KafkaConnectorTests {
         }
 
         // live sync
-        List<LiveSyncDelta> deltas = new ArrayList<>();
+        deltas.clear();
         await().atMost(5, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
             newFacade().livesync(
                     ObjectClass.GROUP,
