@@ -33,8 +33,10 @@ import java.util.Set;
 import java.util.UUID;
 import net.tirasa.connid.bundles.kafka.serialization.AttributeDeserializer;
 import net.tirasa.connid.bundles.kafka.serialization.AttributeSerializer;
+import net.tirasa.connid.bundles.kafka.serialization.ConnectorObjectDeserializer;
 import net.tirasa.connid.bundles.kafka.serialization.GuardedStringDeserializer;
 import net.tirasa.connid.bundles.kafka.serialization.GuardedStringSerializer;
+import net.tirasa.connid.bundles.kafka.serialization.SyncDeltaJacksonDeserializer;
 import net.tirasa.connid.bundles.kafka.serialization.SyncTokenDeserializer;
 import net.tirasa.connid.bundles.kafka.serialization.SyncTokenSerializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -54,6 +56,7 @@ import org.identityconnectors.framework.common.exceptions.PreconditionFailedExce
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.AttributeUtil;
+import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ConnectorObjectBuilder;
 import org.identityconnectors.framework.common.objects.LiveSyncDeltaBuilder;
 import org.identityconnectors.framework.common.objects.LiveSyncResultsHandler;
@@ -94,6 +97,8 @@ public class KafkaConnector
         pojoModule.addDeserializer(GuardedString.class, new GuardedStringDeserializer());
         pojoModule.addDeserializer(Attribute.class, new AttributeDeserializer());
         pojoModule.addDeserializer(SyncToken.class, new SyncTokenDeserializer());
+        pojoModule.addDeserializer(ConnectorObject.class, new ConnectorObjectDeserializer());
+        pojoModule.addDeserializer(SyncDelta.class, new SyncDeltaJacksonDeserializer());
 
         MAPPER = JsonMapper.builder().
                 addModule(pojoModule).

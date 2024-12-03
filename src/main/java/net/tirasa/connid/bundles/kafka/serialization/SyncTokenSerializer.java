@@ -53,5 +53,4 @@ public class SyncTokenSerializer extends JsonSerializer<SyncToken> {
 
         jgen.writeEndObject();
     }
-
 }

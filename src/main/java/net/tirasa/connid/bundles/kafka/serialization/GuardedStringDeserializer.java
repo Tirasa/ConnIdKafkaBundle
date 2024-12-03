@@ -41,9 +41,7 @@ public class GuardedStringDeserializer extends JsonDeserializer<GuardedString> {
     private static final String LOG_ERROR_MESSAGE = "Could not set field value to {}";
 
     @Override
-    public GuardedString deserialize(final JsonParser jp, final DeserializationContext ctx)
-            throws IOException {
-
+    public GuardedString deserialize(final JsonParser jp, final DeserializationContext ctx) throws IOException {
         ObjectNode tree = jp.readValueAsTree();
 
         boolean readOnly = false;
@@ -95,5 +93,4 @@ public class GuardedStringDeserializer extends JsonDeserializer<GuardedString> {
 
         return dest;
     }
-
 }
