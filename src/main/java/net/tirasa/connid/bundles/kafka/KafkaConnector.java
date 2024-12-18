@@ -54,7 +54,6 @@ import org.identityconnectors.framework.common.exceptions.ConnectionFailedExcept
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.exceptions.PreconditionFailedException;
 import org.identityconnectors.framework.common.objects.Attribute;
-import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ConnectorObjectBuilder;
@@ -72,8 +71,8 @@ import org.identityconnectors.framework.common.objects.SyncDeltaType;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.spi.Configuration;
-import org.identityconnectors.framework.spi.Connector;
 import org.identityconnectors.framework.spi.ConnectorClass;
+import org.identityconnectors.framework.spi.PoolableConnector;
 import org.identityconnectors.framework.spi.operations.CreateOp;
 import org.identityconnectors.framework.spi.operations.DeleteOp;
 import org.identityconnectors.framework.spi.operations.LiveSyncOp;
@@ -83,7 +82,7 @@ import org.identityconnectors.framework.spi.operations.UpdateOp;
 
 @ConnectorClass(configurationClass = KafkaConfiguration.class, displayNameKey = "kafka.connector.display")
 public class KafkaConnector
-        implements Connector, CreateOp, UpdateOp, DeleteOp, SchemaOp, LiveSyncOp, TestOp {
+        implements PoolableConnector, CreateOp, UpdateOp, DeleteOp, SchemaOp, LiveSyncOp, TestOp {
 
     private static final Log LOG = Log.getLog(KafkaConnector.class);
 
@@ -180,6 +179,11 @@ public class KafkaConnector
             LOG.error(e, "While testing Kafka consumer");
             throw new ConnectionFailedException(e);
         }
+    }
+
+    @Override
+    public void checkAlive() {
+        test();
     }
 
     @Override
@@ -286,18 +290,23 @@ public class KafkaConnector
                 Map<String, String> headers = new HashMap<>();
                 record.headers().forEach(header -> headers.put(header.key(), new String(header.value())));
 
-                handler.handle(new LiveSyncDeltaBuilder().
-                        setObjectClass(objectClass).
-                        setUid(uid).
-                        setObject(new ConnectorObjectBuilder().
-                                addAttribute(new Name(uid.getUidValue())).
-                                addAttribute(AttributeBuilder.build("record.timestamp", record.timestamp())).
-                                addAttribute(AttributeBuilder.build("record.headers", headers)).
-                                addAttribute(AttributeBuilder.build("record.value", record.value())).
-                                setUid(uid).
-                                build()).
-                        build());
+                try {
+                    ConnectorObjectBuilder object = new ConnectorObjectBuilder().
+                            setObjectClass(objectClass).
+                            setUid(uid).
+                            addAttribute(new Name(uid.getUidValue())).
+                            addAttribute("record.timestamp", record.timestamp()).
+                            addAttribute("record.value", record.value());
+                    if (!headers.isEmpty()) {
+                        object.addAttribute("record.headers", headers);
+                    }
+
+                    handler.handle(new LiveSyncDeltaBuilder().setObject(object.build()).build());
+                } catch (Exception e) {
+                    LOG.error(e, "While processing {0}", record);
+                }
             });
+            consumer.commitSync();
         } catch (Exception e) {
             throw new ConnectorException("While polling events from " + getTopic(objectClass), e);
         }

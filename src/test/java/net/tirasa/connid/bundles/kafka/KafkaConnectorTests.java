@@ -19,6 +19,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -132,6 +133,8 @@ class KafkaConnectorTests {
             return !deltas.isEmpty();
         });
         assertEquals(1, deltas.size());
+        assertNotNull(deltas.get(0).getObject().getAttributeByName("record.timestamp").getValue().get(0));
+        assertNull(deltas.get(0).getObject().getAttributeByName("record.headers"));
         assertEquals(value, deltas.get(0).getObject().getAttributeByName("record.value").getValue().get(0));
     }
 }
