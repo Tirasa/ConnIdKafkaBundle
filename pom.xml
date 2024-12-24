@@ -28,7 +28,7 @@
     
   <groupId>net.tirasa.connid.bundles</groupId>
   <artifactId>net.tirasa.connid.bundles.kafka</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
 
   <name>ConnId Bundles: Kafka</name>
             
@@ -49,7 +49,7 @@
     <connection>scm:git:git@github.com:Tirasa/ConnIdKafkaBundle.git</connection>
     <url>scm:git:git@github.com:Tirasa/ConnIdKafkaBundle.git</url>
     <developerConnection>scm:git:git@github.com:Tirasa/ConnIdKafkaBundle.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>net.tirasa.connid.bundles.kafka-1.0.0</tag>
   </scm>
 
   <issueManagement>
