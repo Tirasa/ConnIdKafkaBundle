@@ -76,7 +76,7 @@
   </mailingLists>
 
   <properties>
-    <connid.version>1.6.0.0-RC2</connid.version>
+    <connid.version>1.6.0.0-RC3</connid.version>
     <kafka.version>3.9.0</kafka.version>
     <jackson.version>2.18.2</jackson.version>
     <testcontainers.version>1.20.4</testcontainers.version>
