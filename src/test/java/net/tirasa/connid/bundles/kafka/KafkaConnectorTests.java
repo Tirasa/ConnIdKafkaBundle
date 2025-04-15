@@ -55,7 +55,7 @@ class KafkaConnectorTests {
             DockerImageName.parse("confluentinc/cp-kafka:7.9.0")).
             withEnv("KAFKA_LISTENERS", "PLAINTEXT://:9092,BROKER://:9093,CONTROLLER://:9094");
 
-    protected KafkaConfiguration newConfiguration() {
+    protected static KafkaConfiguration newConfiguration() {
         KafkaConfiguration config = new KafkaConfiguration();
         config.setBootstrapServers(KAFKA_CONTAINER.getBootstrapServers());
         config.setClientId("connid-client");
@@ -63,7 +63,7 @@ class KafkaConnectorTests {
         return config;
     }
 
-    protected ConnectorFacade newFacade() {
+    protected static ConnectorFacade newFacade() {
         ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
         APIConfiguration impl = TestHelpers.createTestConfiguration(KafkaConnector.class, newConfiguration());
         impl.getResultsHandlerConfiguration().setFilteredResultsHandlerInValidationMode(true);
