@@ -65,7 +65,7 @@
   <properties>
     <connid.version>1.6.1.0</connid.version>
     <kafka.version>4.1.0</kafka.version>
-    <jackson.version>2.20.0</jackson.version>
+    <jackson.version>2.20.1</jackson.version>
     <testcontainers.version>1.21.3</testcontainers.version>
 
     <targetJdk>11</targetJdk>
