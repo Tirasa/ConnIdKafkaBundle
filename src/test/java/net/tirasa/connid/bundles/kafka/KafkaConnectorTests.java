@@ -52,7 +52,7 @@ class KafkaConnectorTests {
 
     @Container
     static ConfluentKafkaContainer KAFKA_CONTAINER = new ConfluentKafkaContainer(
-            DockerImageName.parse("confluentinc/cp-kafka:7.9.0")).
+            DockerImageName.parse("confluentinc/cp-kafka:8.3.1")).
             withEnv("KAFKA_LISTENERS", "PLAINTEXT://:9092,BROKER://:9093,CONTROLLER://:9094");
 
     protected static KafkaConfiguration newConfiguration() {

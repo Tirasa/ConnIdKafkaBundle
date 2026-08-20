@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +48,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.common.security.GuardedString;
-import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.exceptions.ConnectionFailedException;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.exceptions.PreconditionFailedException;
@@ -61,8 +59,6 @@ import org.identityconnectors.framework.common.objects.LiveSyncDeltaBuilder;
 import org.identityconnectors.framework.common.objects.LiveSyncResultsHandler;
 import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.identityconnectors.framework.common.objects.ObjectClassInfo;
-import org.identityconnectors.framework.common.objects.OperationOptionInfo;
 import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.Schema;
 import org.identityconnectors.framework.common.objects.SyncDelta;
@@ -188,11 +184,7 @@ public class KafkaConnector
 
     @Override
     public Schema schema() {
-        return new Schema(
-                Collections.<ObjectClassInfo>emptySet(),
-                Collections.<OperationOptionInfo>emptySet(),
-                Collections.<Class<? extends APIOperation>, Set<ObjectClassInfo>>emptyMap(),
-                Collections.<Class<? extends APIOperation>, Set<OperationOptionInfo>>emptyMap());
+        return new Schema(Set.of(), Set.of(), Map.of(), Map.of());
     }
 
     private String getTopic(final ObjectClass objectClass) {
